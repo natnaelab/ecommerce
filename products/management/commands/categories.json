@@ -1,0 +1,116 @@
+{
+  "Electronics": {
+    "Mobile Phones & Accessories": {
+      "Smartphones": {
+        "Apple": [],
+        "Samsung": ["S Series", "A Series"],
+        "OnePlus": []
+      },
+      "Cases & Covers": [],
+      "Chargers & Cables": ["Wireless Chargers", "USB Cables"]
+    },
+    "Computers & Tablets": {
+      "Laptops": {
+        "Gaming Laptops": ["Dell", "HP", "Asus"],
+        "Ultrabooks": ["MacBook", "Dell XPS"]
+      },
+      "Desktops": ["Gaming Desktops", "All-in-One Desktops"],
+      "Tablets": ["iPad", "Samsung Galaxy Tab"],
+      "Computer Accessories": ["Keyboards", "Mice", "Monitors"]
+    },
+    "Home Appliances": [
+      "Refrigerators",
+      "Washing Machines",
+      "Air Conditioners"
+    ],
+    "Audio & Video": {
+      "Televisions": ["LED TVs", "Smart TVs"],
+      "Headphones": ["Over-Ear", "In-Ear"],
+      "Speakers": ["Bluetooth Speakers", "Home Theater Systems"]
+    },
+    "Cameras & Photography": ["Digital Cameras", "Camera Accessories"]
+  },
+  "Fashion": {
+    "Men's Fashion": {
+      "Clothing": ["Shirts", "Jeans", "Jackets"],
+      "Shoes": ["Casual Shoes", "Formal Shoes"],
+      "Accessories": ["Watches", "Belts"]
+    },
+    "Women's Fashion": {
+      "Clothing": ["Dresses", "Tops", "Skirts"],
+      "Shoes": ["Heels", "Flats"],
+      "Accessories": ["Handbags", "Jewelry"]
+    },
+    "Kids' Fashion": {
+      "Clothing": ["Boys' Clothing", "Girls' Clothing"],
+      "Shoes": ["Boys' Shoes", "Girls' Shoes"],
+      "Accessories": ["Hats", "Bags"]
+    }
+  },
+  "Health & Beauty": {
+    "Skincare": ["Moisturizers", "Cleansers", "Sunscreen"],
+    "Makeup": ["Foundation", "Lipstick", "Mascara"],
+    "Hair Care": ["Shampoos", "Conditioners", "Hair Treatments"],
+    "Health & Wellness": [
+      "Vitamins & Supplements",
+      "Personal Care",
+      "Fitness Equipment"
+    ]
+  },
+  "Home & Garden": {
+    "Furniture": {
+      "Living Room Furniture": ["Sofas", "Coffee Tables"],
+      "Bedroom Furniture": ["Beds", "Wardrobes"],
+      "Office Furniture": ["Office Chairs", "Desks"]
+    },
+    "Home Décor": ["Wall Art", "Rugs", "Lighting"],
+    "Kitchen & Dining": ["Cookware", "Tableware", "Kitchen Storage"],
+    "Garden & Outdoor": [
+      "Outdoor Furniture",
+      "Gardening Tools",
+      "BBQ & Outdoor Heating"
+    ]
+  },
+  "Sports & Outdoors": {
+    "Sports Equipment": {
+      "Fitness Equipment": ["Treadmills", "Dumbbells"],
+      "Team Sports": ["Soccer", "Basketball"],
+      "Individual Sports": ["Tennis", "Golf"]
+    },
+    "Outdoor Gear": ["Camping & Hiking", "Cycling", "Fishing"]
+  },
+  "Toys & Games": {
+    "Action Figures & Dolls": ["Superheroes", "Barbie"],
+    "Educational Toys": ["STEM Toys", "Puzzle Games"],
+    "Board Games & Puzzles": ["Monopoly", "Jigsaw Puzzles"],
+    "Outdoor Play": ["Swings", "Slides"]
+  },
+  "Books, Music & Movies": {
+    "Books": ["Fiction", "Non-fiction", "Children's Books"],
+    "Music": ["CDs", "Vinyl", "Digital Music"],
+    "Movies & TV": ["DVDs", "Blu-rays", "Digital Downloads"]
+  },
+  "Automotive": {
+    "Car Accessories": ["Interior Accessories", "Exterior Accessories"],
+    "Motorcycle Accessories": ["Helmets", "Gloves"],
+    "Vehicle Parts": ["Engine Parts", "Tires & Wheels"]
+  },
+  "Baby Products": {
+    "Baby Clothing": ["Onesies", "T-Shirts"],
+    "Diapers & Wipes": ["Disposable Diapers", "Cloth Diapers"],
+    "Baby Gear": ["Strollers", "Car Seats"],
+    "Feeding": ["Bottles", "Breastfeeding Supplies"]
+  },
+  "Groceries": {
+    "Beverages": ["Coffee & Tea", "Soft Drinks"],
+    "Snacks": ["Chips", "Candy"],
+    "Pantry Staples": ["Pasta & Rice", "Canned Goods"],
+    "Fresh Produce": ["Fruits", "Vegetables"]
+  },
+  "Pet Supplies": {
+    "Dogs": ["Food", "Toys", "Grooming"],
+    "Cats": ["Food", "Litter & Accessories", "Toys"],
+    "Fish & Aquatic Pets": ["Aquariums", "Food"],
+    "Birds": ["Cages", "Food"]
+  }
+}
