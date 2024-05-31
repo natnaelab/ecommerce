@@ -1,4 +1,6 @@
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 from django.core.validators import (
     MinLengthValidator,
     MaxLengthValidator,
@@ -15,7 +17,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     added_by = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, validators=[MinLengthValidator(3)])
-    slug = models.SlugField(unique=True, null=True, db_index=True)
+    slug = models.SlugField(unique=True, db_index=True)
     description = models.TextField(validators=[MaxLengthValidator(2000)])
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(1.00))]
@@ -25,12 +27,14 @@ class Product(models.Model):
         "Category", related_name="products", on_delete=models.SET_NULL, null=True
     )
 
-    def save(self, *args, **kwargs):
-        unique_slugify(self)
-        super(Product, self).save(*args, **kwargs)
-
     def __str__(self) -> str:
         return self.name
+
+
+@receiver(pre_save, sender=Product)
+def set_product_slug(sender, instance, *args, **kwargs):
+    if instance.pk is None:
+        unique_slugify(instance)
 
 
 class ProductImage(models.Model):

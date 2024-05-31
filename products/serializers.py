@@ -33,7 +33,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "images",
             "preview_images",
         )
-        read_only_fields = ("id", "added_by")
+        read_only_fields = ("id", "added_by", "slug")
 
     def validate_price(self, price):
         if price <= 0:
