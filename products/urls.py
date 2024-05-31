@@ -3,7 +3,6 @@ from django.conf import settings
 from .views import (
     ProductListCreateView,
     ProductRetrieveUpdateDestroy,
-    ProductImageList,
     ProductImageUpdateDestroy,
     ProductReviewListCreateView,
     ProductReviewUpdateDestroyView,
@@ -18,11 +17,6 @@ urlpatterns = [
         "products/<int:pk>/",
         ProductRetrieveUpdateDestroy.as_view(),
         name="product-retrieve-update-destroy",
-    ),
-    path(
-        "products/<int:pk>/images/",
-        ProductImageList.as_view(),
-        name="product-image-list",
     ),
     path(
         "products/images/<int:pk>/",

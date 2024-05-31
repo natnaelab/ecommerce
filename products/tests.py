@@ -23,7 +23,7 @@ class ProductListTests(APITestCase):
             "name": "Product 1",
             "description": "Description 1",
             "price": 10.00,
-            "stock": 5,
+            "in_stock": 5,
             "images": self.image,
             "label": "SALE",
             "category": self.category,

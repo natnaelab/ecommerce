@@ -1,5 +1,4 @@
 from rest_framework import generics, filters, permissions
-from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -12,16 +11,21 @@ from .serializers import (
 )
 
 from common.permissions import IsManager
-from .permissions import IsManagerAndProductOwner
+from .permissions import IsManagerAndProductOwner, IsManagerOrReadOnly
+from .filters import ProductFilter
+from .paginations import ProductPagination
 
 
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 100
+class ProductQuerySetMixin:
+    def get_queryset(self):
+        return (
+            Product.objects.select_related("added_by", "category")
+            .prefetch_related("images")
+            .order_by("-created_at")
+        )
 
 
-class ProductListCreateView(generics.ListCreateAPIView):
+class ProductListCreateView(ProductQuerySetMixin, generics.ListCreateAPIView):
     """
     List all products or create a new product.
 
@@ -35,26 +39,19 @@ class ProductListCreateView(generics.ListCreateAPIView):
         filters.OrderingFilter,
         filters.SearchFilter,
     ]
-    filterset_fields = ["price", "stock", "category"]
-    ordering_fields = ["price", "stock"]
+    filterset_class = ProductFilter
+    ordering_fields = ["price"]
     search_fields = ["name", "description"]
-
-    def get_queryset(self):
-        qs = Product.objects.prefetch_related("images").select_related("category")
-        if self.request.method == "GET":
-            return qs
-        return qs.filter(added_by=self.request.user)
-
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return (permissions.AllowAny(),)
-        return (IsManager(),)
+    pagination_class = ProductPagination
+    permission_classes = [IsManagerOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(added_by=self.request.user)
 
 
-class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+class ProductRetrieveUpdateDestroy(
+    ProductQuerySetMixin, generics.RetrieveUpdateDestroyAPIView
+):
     """
     Retrieve, update or delete a product.
 
@@ -65,32 +62,10 @@ class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = ProductSerializer
 
-    def get_queryset(self):
-        qs = Product.objects.prefetch_related("images")
-        if self.request.method == "GET":
-            return qs
-        return qs.filter(added_by=self.request.user)
-
     def get_permissions(self):
         if self.request.method == "GET":
             return (permissions.AllowAny(),)
         return (IsManagerAndProductOwner(),)
-
-
-class ProductImageList(generics.ListAPIView):
-    """
-    List all product images for a given product.
-
-    GET:
-    Returns a list of images associated with the given product ID.
-    """
-
-    serializer_class = ProductImageSerializer
-    permission_classes = (permissions.AllowAny,)
-
-    def get_queryset(self):
-        product = get_object_or_404(Product, pk=self.kwargs["pk"])
-        return product.images.all()
 
 
 class ProductImageUpdateDestroy(generics.UpdateAPIView, generics.DestroyAPIView):
@@ -118,7 +93,6 @@ class ProductReviewListCreateView(generics.ListCreateAPIView):
     POST: Creates a new review for the specified product. Only accessible by authenticated users.
     """
 
-    queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
@@ -126,8 +100,9 @@ class ProductReviewListCreateView(generics.ListCreateAPIView):
         return get_object_or_404(Product, pk=pk)
 
     def get_queryset(self):
-        product = self.get_product_or_404(self.kwargs["pk"])
-        return ProductReview.objects.filter(product=product)
+        return ProductReview.objects.filter(
+            product__pk=self.kwargs["pk"]
+        ).select_related("user")
 
     def perform_create(self, serializer):
         product = self.get_product_or_404(self.kwargs["pk"])
@@ -142,12 +117,13 @@ class ProductReviewUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPI
     DELETE: Deletes a review. Only accessible by the review creator.
     """
 
-    queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return ProductReview.objects.filter(user=self.request.user)
+        return ProductReview.objects.filter(
+            product__pk=self.kwargs["pk"], user=self.request.user
+        ).select_related("user")
 
 
 class CategoriesListView(generics.ListAPIView):

@@ -7,3 +7,11 @@ class IsManagerAndProductOwner(permissions.BasePermission):
             request.user.groups.filter(name="Manager").exists()
             and obj.added_by == request.user
         )
+
+
+class IsManagerOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.groups.filter(name="Manager").exists()
+            or request.method in permissions.SAFE_METHODS
+        )

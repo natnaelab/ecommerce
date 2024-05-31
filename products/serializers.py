@@ -12,6 +12,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
     preview_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
         write_only=True,
@@ -24,14 +25,15 @@ class ProductSerializer(serializers.ModelSerializer):
             "id",
             "added_by",
             "name",
+            "slug",
             "description",
             "price",
-            "stock",
+            "in_stock",
             "category",
+            "images",
             "preview_images",
         )
         read_only_fields = ("id", "added_by")
-        validators = []
 
     def validate_price(self, price):
         if price <= 0:
@@ -53,8 +55,8 @@ class ProductSerializer(serializers.ModelSerializer):
         for image in images:
             ProductImage.objects.create(product=instance, image=image)
 
-        if "stock" in validated_data:
-            instance.stock = validated_data["stock"]
+        if "in_stock" in validated_data:
+            instance.in_stock = validated_data["in_stock"]
             instance.save()
             instance.refresh_from_db()
 
