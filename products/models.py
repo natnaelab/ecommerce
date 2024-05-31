@@ -60,7 +60,7 @@ class Category(MPTTModel):
         "self", blank=True, null=True, related_name="children", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, null=True)
+    slug = models.SlugField(unique=True, db_index=True)
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -74,6 +74,12 @@ class Category(MPTTModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+@receiver(pre_save, sender=Category)
+def set_category_slug(sender, instance, *args, **kwargs):
+    if instance.pk is None:
+        unique_slugify(instance)
 
 
 class ProductReview(models.Model):
