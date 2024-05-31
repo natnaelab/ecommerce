@@ -11,14 +11,16 @@ from decimal import Decimal
 
 
 class Product(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     added_by = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, validators=[MinLengthValidator(3)])
-    slug = models.SlugField(unique=True, null=True)
+    slug = models.SlugField(unique=True, null=True, db_index=True)
     description = models.TextField(validators=[MaxLengthValidator(2000)])
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(1.00))]
     )
-    stock = models.PositiveIntegerField()
+    in_stock = models.PositiveIntegerField()
     category = models.ForeignKey(
         "Category", related_name="products", on_delete=models.SET_NULL, null=True
     )
@@ -83,6 +85,3 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.rating}* - {self.comment}"
-
-    class Meta:
-        unique_together = ("product", "user")
