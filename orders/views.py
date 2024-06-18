@@ -1,19 +1,16 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 from django.conf import settings
-from django.db import transaction
+from common.permissions import IsManager
 from .models import CartItem, Order, ShippingAddress
 from .serializers import CartItemSerializer, OrderSerializer, ShippingAddressSerializer
-from common.permissions import IsManager
 import stripe
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# CartItem View
 class CartItemListCreate(generics.ListCreateAPIView):
     """
     List all cart items or create a new cart item.
@@ -21,34 +18,18 @@ class CartItemListCreate(generics.ListCreateAPIView):
 
     serializer_class = CartItemSerializer
     permission_classes = [permissions.IsAuthenticated]
+    ordering_fields = ["price"]
 
     def get_queryset(self):
-        return CartItem.objects.filter(user=self.request.user)
+        return (
+            CartItem.objects.filter(user=self.request.user)
+            .select_related("product")
+            .prefetch_related("product__images")
+            .order_by("-created_at")
+        )
 
     def perform_create(self, serializer):
-        product = serializer.validated_data["product"]
-        cart_item, created = self._add_or_update_cart_item(product, serializer)
-        print(cart_item, created)
-        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        print(status_code)
-        return Response(CartItemSerializer(cart_item).data, status=status_code)
-
-    def _add_or_update_cart_item(self, product, serializer):
-        with transaction.atomic():
-            existing_cart_item = (
-                CartItem.objects.select_for_update()
-                .filter(user=self.request.user, product=product)
-                .first()
-            )
-            
-
-            if existing_cart_item:
-                existing_cart_item.quantity += 1
-                existing_cart_item.save()
-                return existing_cart_item, False
-            else:
-                cart_item = serializer.save(user=self.request.user)
-                return cart_item, True
+        serializer.save(user=self.request.user)
 
 
 class CartItemUpdateDestroy(generics.UpdateAPIView, generics.DestroyAPIView):
@@ -60,41 +41,26 @@ class CartItemUpdateDestroy(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return CartItem.objects.filter(user=self.request.user)
+        return CartItem.objects.filter(user=self.request.user).select_related("product")
 
 
-# Order View
 class OrderListCreate(generics.ListCreateAPIView):
     """
-    List all orders or create a new order
+    Create a new order
     """
 
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        print(self.request.user)
-        return Order.objects.filter(user=self.request.user)
+        return (
+            Order.objects.filter(user=self.request.user)
+            .select_related("shipping_address")
+            .prefetch_related("items__product__images")
+        )
 
     def perform_create(self, serializer):
-        cart_items = CartItem.objects.filter(user=self.request.user)
-        total_price = sum(item.product.price * item.quantity for item in cart_items)
-        shpping_address_data = self.request.data.pop("shipping_address")
-        shipping_address, created = ShippingAddress.objects.get_or_create(
-            user=self.request.user, **shpping_address_data
-        )
-        order = serializer.save(
-            user=self.request.user,
-            total_price=total_price,
-            shipping_address=shipping_address,
-        )
-        order.items.set(cart_items)
-        order.save()
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        return {"yes": "no"}
-        # return super().create(request, *args, **kwargs)
+        serializer.save(user=self.request.user)
 
 
 class OrderStatusUpdate(generics.UpdateAPIView):
@@ -104,7 +70,7 @@ class OrderStatusUpdate(generics.UpdateAPIView):
 
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated, IsManager]
+    permission_classes = [IsManager]
 
     def update(self, request, *args, **kwargs):
         order = self.get_object()
@@ -120,17 +86,61 @@ class OrderStatusUpdate(generics.UpdateAPIView):
             )
 
 
-class ShippingAddressCreate(generics.CreateAPIView):
-    serializer_class = ShippingAddressSerializer
+class OrderItemRetrieve(generics.RetrieveAPIView):
+    """
+    Retrieve an order item
+    """
+
+    serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Order.objects.filter(user=self.request.user)
+            .select_related("shipping_address")
+            .prefetch_related("items__product__images")
+        )
+
+
+class ShippingAddressCreate(generics.CreateAPIView):
+    """
+    Create or update shipping address
+    """
+
+    serializer_class = ShippingAddressSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        try:
+            shipping_address = ShippingAddress.objects.get(user=self.request.user)
+            serializer.update(shipping_address, self.request.data)
+        except ShippingAddress.DoesNotExist:
+            serializer.save(user=self.request.user)
 
 
-class ShippingAddressRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+class ShippingAddressRetrieve(APIView):
+    """
+    Retrieve logged in user's shipping address
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            shipping_address = ShippingAddress.objects.get(user=self.request.user)
+            serializer = ShippingAddressSerializer(shipping_address)
+            return Response(serializer.data)
+        except ShippingAddress.DoesNotExist:
+            return Response({"error": "Shipping address not found"}, status=404)
+
+
+class ShippingAddressUpdateDestroy(generics.UpdateAPIView, generics.DestroyAPIView):
+    """
+    Update or delete shipping address
+    """
+
     serializer_class = ShippingAddressSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return ShippingAddress.objects.filter(user=self.request.user)
