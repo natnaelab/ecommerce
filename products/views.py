@@ -1,7 +1,6 @@
 from rest_framework import generics, filters, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 from .models import Product, ProductImage, ProductReview, Category
 from .serializers import (
     ProductSerializer,
@@ -49,7 +48,7 @@ class ProductListCreateView(ProductQuerySetMixin, generics.ListCreateAPIView):
         serializer.save(added_by=self.request.user)
 
 
-class ProductRetrieveUpdateDestroy(
+class ProductRetrieveUpdateDestroyView(
     ProductQuerySetMixin, generics.RetrieveUpdateDestroyAPIView
 ):
     """
@@ -68,7 +67,7 @@ class ProductRetrieveUpdateDestroy(
         return (IsManagerAndProductOwner(),)
 
 
-class ProductImageUpdateDestroy(generics.UpdateAPIView, generics.DestroyAPIView):
+class ProductImageUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
     """
     Update or delete product image.
 

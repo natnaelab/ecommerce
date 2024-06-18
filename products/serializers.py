@@ -1,4 +1,3 @@
-from django.db.models import F
 from rest_framework import serializers
 from .models import Product, ProductImage, ProductReview, Category
 from users.serializers import UserSerializer
@@ -65,7 +64,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation["images"] = ProductImageSerializer(
-            instance.images, many=True
+            instance.images.all(), many=True
         ).data
         return representation
 

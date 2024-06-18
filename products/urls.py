@@ -1,9 +1,8 @@
-from django.urls import path, include
-from django.conf import settings
+from django.urls import path
 from .views import (
     ProductListCreateView,
-    ProductRetrieveUpdateDestroy,
-    ProductImageUpdateDestroy,
+    ProductRetrieveUpdateDestroyView,
+    ProductImageUpdateDestroyView,
     ProductReviewListCreateView,
     ProductReviewUpdateDestroyView,
     CategoriesListView,
@@ -15,12 +14,12 @@ urlpatterns = [
     path("products/", ProductListCreateView.as_view(), name="product-list-create"),
     path(
         "products/<int:pk>/",
-        ProductRetrieveUpdateDestroy.as_view(),
+        ProductRetrieveUpdateDestroyView.as_view(),
         name="product-retrieve-update-destroy",
     ),
     path(
         "products/images/<int:pk>/",
-        ProductImageUpdateDestroy.as_view(),
+        ProductImageUpdateDestroyView.as_view(),
         name="product-image-update-destroy",
     ),
     path(
