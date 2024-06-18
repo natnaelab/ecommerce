@@ -1,0 +1,12 @@
+Django>=5.0.6
+djangorestframework==3.15.1
+djoser==2.2.2
+djangorestframework-simplejwt==5.3.1
+django-filter==24.2
+django-mptt==0.16.0
+psycopg2-binary==2.9.9
+django-debug-toolbar==4.4.2
+django-redis==5.4.0
+Pillow
+stripe
+gunicorn
