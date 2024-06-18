@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import BaseUserManager, AbstractUser
 from django.db import models
 
 
@@ -37,7 +37,7 @@ class Customer(CustomUser):
         proxy = True
 
 
-class SuperUserManager(models.Manager):
+class SuperUserManager(BaseUserManager):
     def get_queryset(self):
         return super().get_queryset().filter(is_superuser=True)
 
